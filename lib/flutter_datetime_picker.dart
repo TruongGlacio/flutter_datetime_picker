@@ -22,6 +22,7 @@ class DatePicker {
   ///
   static Future<DateTime?> showDatePicker(
     BuildContext context, {
+      String? title,
     bool showTitleActions: true,
     DateTime? minTime,
     DateTime? maxTime,
@@ -36,6 +37,7 @@ class DatePicker {
       context,
       _DatePickerRoute(
         showTitleActions: showTitleActions,
+
         onChanged: onChanged,
         onConfirm: onConfirm,
         onCancel: onCancel,
@@ -124,6 +126,7 @@ class DatePicker {
   ///
   static Future<DateTime?> showDateTimePicker(
     BuildContext context, {
+      String? title,
     bool showTitleActions: true,
     DateTime? minTime,
     DateTime? maxTime,
@@ -137,6 +140,7 @@ class DatePicker {
     return await Navigator.push(
       context,
       _DatePickerRoute(
+        title: title,
         showTitleActions: showTitleActions,
         onChanged: onChanged,
         onConfirm: onConfirm,
@@ -187,6 +191,7 @@ class DatePicker {
 
 class _DatePickerRoute<T> extends PopupRoute<T> {
   _DatePickerRoute({
+    this.title,
     this.showTitleActions,
     this.onChanged,
     this.onConfirm,
@@ -200,6 +205,7 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
         this.theme = theme ?? DatePickerTheme(),
         super(settings: settings);
 
+  String? title;
   final bool? showTitleActions;
   final DateChangedCallback? onChanged;
   final DateChangedCallback? onConfirm;
@@ -237,6 +243,7 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
       context: context,
       removeTop: true,
       child: _DatePickerComponent(
+        title: title,
         onChanged: onChanged,
         locale: this.locale,
         route: this,
@@ -252,6 +259,7 @@ class _DatePickerComponent extends StatefulWidget {
     Key? key,
     required this.route,
     required this.pickerModel,
+    this.title,
     this.onChanged,
     this.locale,
   }) : super(key: key);
@@ -261,7 +269,7 @@ class _DatePickerComponent extends StatefulWidget {
   final _DatePickerRoute route;
 
   final LocaleType? locale;
-
+  String? title;
   final BasePickerModel pickerModel;
 
   @override
@@ -310,7 +318,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
               child: GestureDetector(
                 child: material.Material(
                   color: theme.backgroundColor,
-                  child: _renderPickerView(theme),
+                  child: _renderPickerView(theme, title:widget.title),
                 ),
               ),
             ),
@@ -326,12 +334,12 @@ class _DatePickerState extends State<_DatePickerComponent> {
     }
   }
 
-  Widget _renderPickerView(DatePickerTheme theme) {
-    Widget itemView = _renderItemView(theme);
+  Widget _renderPickerView(DatePickerTheme theme, {String? title}) {
+    Widget itemView = _renderItemView(theme, title);
     if (widget.route.showTitleActions == true) {
       return Column(
         children: <Widget>[
-          _renderTitleActionsView(theme),
+          _renderTitleActionsView(theme, title),
           itemView,
         ],
       );
@@ -396,7 +404,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
     );
   }
 
-  Widget _renderItemView(DatePickerTheme theme) {
+  Widget _renderItemView(DatePickerTheme theme, String? title) {
     return Container(
       color: theme.backgroundColor,
       child: Directionality(
@@ -443,6 +451,10 @@ class _DatePickerState extends State<_DatePickerComponent> {
                   : null,
             ),
             Text(
+              title??'',
+              style: theme.itemStyle,
+            ),
+            Text(
               widget.pickerModel.rightDivider(),
               style: theme.itemStyle,
             ),
@@ -471,7 +483,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
   }
 
   // Title View
-  Widget _renderTitleActionsView(DatePickerTheme theme) {
+  Widget _renderTitleActionsView(DatePickerTheme theme, String? title) {
     final done = _localeDone();
     final cancel = _localeCancel();
 
@@ -499,6 +511,10 @@ class _DatePickerState extends State<_DatePickerComponent> {
                 }
               },
             ),
+          ),
+          Text(
+            title??'',
+            style: theme.itemStyle,
           ),
           Container(
             height: theme.titleHeight,
